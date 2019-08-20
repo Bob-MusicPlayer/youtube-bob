@@ -5,4 +5,5 @@ type PlaybackInfo struct {
 	Position   float64 `json:"position"`
 	Duration   float64 `json:"duration"`
 	Title      string  `json:"title"`
+	Paused     bool    `json:"paused"`
 }

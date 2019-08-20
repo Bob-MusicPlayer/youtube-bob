@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path"
 	"runtime"
+	"time"
 )
 
 type Player struct {
@@ -24,14 +25,18 @@ func NewPlayer() (*Player, error) {
 		socketPath = path.Join(os.TempDir(), "mpv-socket")
 	}
 
-	mpvCommand := exec.Command("mpv", "--idle=yes", fmt.Sprintf("--input-ipc-server=%s", socketPath), "-ytdl-format=bestaudio")
+	mpvCommand := exec.Command("mpv", "--idle=yes", fmt.Sprintf("--input-ipc-server=%s", socketPath), "-ytdl-format=bestaudio", "--keep-open=always", "--pause")
 	err := mpvCommand.Start()
 	if err != nil {
 		return nil, err
 	}
 
 	ipc := mpvipc.NewConnection("\\\\.\\pipe\\tmp\\mpv-socket")
+
+	time.Sleep(time.Millisecond * 200)
+
 	err = ipc.Open()
+
 	if err != nil {
 		return nil, err
 	}
@@ -44,6 +49,11 @@ func NewPlayer() (*Player, error) {
 
 func (p *Player) SetPlayback(url string) error {
 	_, err := p.ipc.Call("loadfile", url)
+	if err != nil {
+		return err
+	}
+
+	err = p.Play()
 
 	return err
 }
@@ -94,4 +104,13 @@ func (p *Player) GetTitle() (string, error) {
 	}
 
 	return i.(string), nil
+}
+
+func (p *Player) IsPaused() (bool, error) {
+	i, err := p.ipc.Get("pause")
+	if err != nil {
+		return false, err
+	}
+
+	return i.(bool), nil
 }
