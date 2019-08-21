@@ -31,7 +31,7 @@ func NewPlayer() (*Player, error) {
 		return nil, err
 	}
 
-	ipc := mpvipc.NewConnection("\\\\.\\pipe\\tmp\\mpv-socket")
+	ipc := mpvipc.NewConnection(socketPath)
 
 	time.Sleep(time.Millisecond * 200)
 

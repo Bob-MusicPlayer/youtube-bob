@@ -1,6 +1,8 @@
 package handler
 
 import (
+	bobModel "bob/model"
+	"fmt"
 	"net/http"
 	shared "shared-bob"
 	"youtube-bob/model"
@@ -54,14 +56,14 @@ func (yh *YoutubeHandler) HandleSetPlayback(w http.ResponseWriter, req *http.Req
 		return
 	}
 
-	var playback model.SetPlayback
+	var playback bobModel.Playback
 
 	err := responseHelper.DecodeBody(&playback)
 	if responseHelper.ReturnHasError(err) {
 		return
 	}
 
-	err = yh.player.SetPlayback(playback.Url)
+	err = yh.player.SetPlayback(fmt.Sprintf("https://www.youtube.com/watch?v=%s", playback.ID))
 	if responseHelper.ReturnHasError(err) {
 		return
 	}
