@@ -118,10 +118,25 @@ func (yh *YoutubeHandler) HandleSearch(w http.ResponseWriter, req *http.Request)
 
 	query := req.URL.Query().Get("q")
 
+	songs := make([]bobModel.Playback, 0)
+
 	playlists, err := yh.youtubeRepository.Search(query)
 	if responseHelper.ReturnHasError(err) {
 		return
 	}
 
-	responseHelper.ReturnOk(playlists)
+	for _, playback := range playlists.Items {
+		playback := bobModel.Playback{
+			Title:        playback.Snippet.Title,
+			Author:       playback.Snippet.ChannelTitle,
+			Duration:     0,
+			ID:           playback.ID.VideoID,
+			ThumbnailUrl: playback.Snippet.Thumbnails.High.URL,
+			Source:       "youtube",
+		}
+
+		songs = append(songs, playback)
+	}
+
+	responseHelper.ReturnOk(songs)
 }
