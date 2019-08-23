@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	shared "shared-bob"
-	"youtube-bob/model"
 	"youtube-bob/repository"
 	"youtube-bob/util"
 )
@@ -63,10 +62,19 @@ func (yh *YoutubeHandler) HandleSetPlayback(w http.ResponseWriter, req *http.Req
 		return
 	}
 
-	err = yh.player.SetPlayback(fmt.Sprintf("https://www.youtube.com/watch?v=%s", playback.ID))
+	err = yh.player.SetPlayback(playback.ID)
 	if responseHelper.ReturnHasError(err) {
 		return
 	}
+
+	videoInfo, err := yh.youtubeRepository.GetVideoInfo(playback.ID)
+	if responseHelper.ReturnHasError(err) {
+		return
+	}
+
+	yh.player.CurrentPlayback.Title = videoInfo.Items[0].Snippet.Title
+	yh.player.CurrentPlayback.Author = videoInfo.Items[0].Snippet.ChannelTitle
+	yh.player.CurrentPlayback.ThumbnailUrl = videoInfo.Items[0].Snippet.Thumbnails.High.URL
 
 	responseHelper.ReturnOk(nil)
 }
@@ -82,17 +90,31 @@ func (yh *YoutubeHandler) HandlePlaybackInfo(w http.ResponseWriter, req *http.Re
 	duration, _ := yh.player.GetDuration()
 	title, _ := yh.player.GetTitle()
 
-	paused, err := yh.player.IsPaused()
+	isPlaying, err := yh.player.IsPlaying()
 	if responseHelper.ReturnHasError(err) {
 		return
 	}
 
-	responseHelper.ReturnOk(model.PlaybackInfo{
-		CachedTime: cachedTime,
-		Position:   position,
-		Duration:   duration,
-		Title:      title,
-		Paused:     paused,
+	if yh.player.CurrentPlayback == nil {
+		responseHelper.ReturnOk(bobModel.Playback{
+			Source:    "youtube",
+			IsPlaying: false,
+		})
+		return
+	}
+
+	fmt.Println(isPlaying)
+
+	responseHelper.ReturnOk(bobModel.Playback{
+		ID:            yh.player.CurrentPlayback.ID,
+		Title:         title,
+		Author:        yh.player.CurrentPlayback.Author,
+		Position:      position,
+		Duration:      duration,
+		CachePosition: cachedTime,
+		Source:        "youtube",
+		ThumbnailUrl:  yh.player.CurrentPlayback.ThumbnailUrl,
+		IsPlaying:     isPlaying,
 	})
 }
 

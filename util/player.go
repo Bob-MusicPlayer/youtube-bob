@@ -1,6 +1,7 @@
 package util
 
 import (
+	bobModel "bob/model"
 	"fmt"
 	"github.com/DexterLB/mpvipc"
 	"os"
@@ -11,8 +12,9 @@ import (
 )
 
 type Player struct {
-	mpvCommand *exec.Cmd
-	ipc        *mpvipc.Connection
+	mpvCommand      *exec.Cmd
+	ipc             *mpvipc.Connection
+	CurrentPlayback *bobModel.Playback
 }
 
 func NewPlayer() (*Player, error) {
@@ -33,7 +35,7 @@ func NewPlayer() (*Player, error) {
 
 	ipc := mpvipc.NewConnection(socketPath)
 
-	time.Sleep(time.Millisecond * 200)
+	time.Sleep(time.Millisecond * 400)
 
 	err = ipc.Open()
 
@@ -47,10 +49,15 @@ func NewPlayer() (*Player, error) {
 	}, nil
 }
 
-func (p *Player) SetPlayback(url string) error {
-	_, err := p.ipc.Call("loadfile", url)
+func (p *Player) SetPlayback(id string) error {
+	_, err := p.ipc.Call("loadfile", fmt.Sprintf("https://www.youtube.com/watch?v=%s", id))
 	if err != nil {
 		return err
+	}
+
+	p.CurrentPlayback = &bobModel.Playback{
+		ID:     id,
+		Source: "youtube",
 	}
 
 	err = p.Play()
@@ -106,11 +113,11 @@ func (p *Player) GetTitle() (string, error) {
 	return i.(string), nil
 }
 
-func (p *Player) IsPaused() (bool, error) {
+func (p *Player) IsPlaying() (bool, error) {
 	i, err := p.ipc.Get("pause")
 	if err != nil {
 		return false, err
 	}
 
-	return i.(bool), nil
+	return !i.(bool), nil
 }

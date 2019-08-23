@@ -49,3 +49,19 @@ func (y *YoutubeRepository) Search(query string) (*model.Search, error) {
 
 	return &playlistItems, err
 }
+
+func (y *YoutubeRepository) GetVideoInfo(id string) (*model.VideoInfo, error) {
+	var videoInfo model.VideoInfo
+
+	response, err := y.requestHelper.Get(fmt.Sprintf("/v3/videos?part=snippet&id=%s&key=%s", id, y.apiKey), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	err = response.DecodeBody(&videoInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	return &videoInfo, err
+}
