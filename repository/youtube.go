@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"net/url"
 	shared "shared-bob"
 	"youtube-bob/model"
 )
@@ -37,7 +38,7 @@ func (y *YoutubeRepository) GetPlaylist(id string) (*model.PlaylistItems, error)
 func (y *YoutubeRepository) Search(query string) (*model.Search, error) {
 	var playlistItems model.Search
 
-	response, err := y.requestHelper.Get(fmt.Sprintf("/v3/search?part=snippet&maxResults=25&q=%s&type=video,playlist&key=%s", query, y.apiKey), nil)
+	response, err := y.requestHelper.Get(fmt.Sprintf("/v3/search?part=snippet&maxResults=25&q=%s&type=video,playlist&key=%s", url.QueryEscape(query), y.apiKey), nil)
 	if err != nil {
 		return nil, err
 	}

@@ -121,3 +121,13 @@ func (p *Player) IsPlaying() (bool, error) {
 
 	return !i.(bool), nil
 }
+
+func (p *Player) Seek(seconds int) error {
+	fmt.Println(seconds)
+	err := p.ipc.Set("time-pos", seconds)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

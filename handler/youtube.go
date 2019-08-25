@@ -2,8 +2,10 @@ package handler
 
 import (
 	bobModel "bob/model"
+	"fmt"
 	"net/http"
 	shared "shared-bob"
+	"strconv"
 	"youtube-bob/repository"
 	"youtube-bob/util"
 )
@@ -158,4 +160,32 @@ func (yh *YoutubeHandler) HandleSearch(w http.ResponseWriter, req *http.Request)
 	}
 
 	responseHelper.ReturnOk(songs)
+}
+
+func (yh *YoutubeHandler) HandlePlaybackSeek(w http.ResponseWriter, req *http.Request) {
+	responseHelper := shared.NewResponseHelper(w, req)
+	if responseHelper.ReturnOptionsOrNotAllowed(http.MethodPost) {
+		return
+	}
+
+	seconds := req.URL.Query().Get("seconds")
+
+	fmt.Println(seconds)
+
+	if seconds == "" {
+		responseHelper.ReturnError(fmt.Errorf("seconds must be specified"))
+		return
+	}
+
+	sec, err := strconv.Atoi(seconds)
+	if responseHelper.ReturnHasError(err) {
+		return
+	}
+
+	err = yh.player.Seek(sec)
+	if responseHelper.ReturnHasError(err) {
+		return
+	}
+
+	responseHelper.ReturnOk(nil)
 }

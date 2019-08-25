@@ -45,6 +45,7 @@ func main() {
 	http.HandleFunc("/api/v1/play", youtubeHandler.HandlePlay)
 	http.HandleFunc("/api/v1/pause", youtubeHandler.HandlePause)
 	http.HandleFunc("/api/v1/playback/info", youtubeHandler.HandlePlaybackInfo)
+	http.HandleFunc("/api/v1/playback/seek", youtubeHandler.HandlePlaybackSeek)
 
 	http.HandleFunc("/api/v1/playlist", youtubeHandler.HandlePlaylist)
 	http.HandleFunc("/api/v1/search", youtubeHandler.HandleSearch)
