@@ -2,7 +2,6 @@ package handler
 
 import (
 	bobModel "bob/model"
-	"fmt"
 	"net/http"
 	shared "shared-bob"
 	"youtube-bob/repository"
@@ -102,8 +101,6 @@ func (yh *YoutubeHandler) HandlePlaybackInfo(w http.ResponseWriter, req *http.Re
 		})
 		return
 	}
-
-	fmt.Println(isPlaying)
 
 	responseHelper.ReturnOk(bobModel.Playback{
 		ID:            yh.player.CurrentPlayback.ID,
