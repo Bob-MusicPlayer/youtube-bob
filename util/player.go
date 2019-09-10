@@ -9,15 +9,17 @@ import (
 	"path"
 	"runtime"
 	"time"
+	"youtube-bob/repository"
 )
 
 type Player struct {
 	mpvCommand      *exec.Cmd
 	ipc             *mpvipc.Connection
 	CurrentPlayback *bobModel.Playback
+	bobRepository   *repository.BobRepository
 }
 
-func NewPlayer() (*Player, error) {
+func NewPlayer(bobRepository *repository.BobRepository) (*Player, error) {
 	socketPath := ""
 
 	if runtime.GOOS == "windows" {
@@ -44,8 +46,9 @@ func NewPlayer() (*Player, error) {
 	}
 
 	return &Player{
-		ipc:        ipc,
-		mpvCommand: mpvCommand,
+		ipc:           ipc,
+		mpvCommand:    mpvCommand,
+		bobRepository: bobRepository,
 	}, nil
 }
 
@@ -127,6 +130,34 @@ func (p *Player) Seek(seconds int) error {
 	err := p.ipc.Set("time-pos", seconds)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (p *Player) ListenForCacheChanges() error {
+	lastTime := float64(0)
+	startTime := time.Now()
+
+	for {
+		t, err := p.GetCacheTime()
+		if err != nil {
+			continue
+		}
+		if lastTime != t {
+			p.CurrentPlayback.CachePosition = t
+			p.bobRepository.Sync()
+			lastTime = t
+		}
+		duration, err := p.GetDuration()
+		if err != nil {
+			continue
+		}
+
+		if time.Now().Sub(startTime) > time.Second * 5 || (duration > 0 && duration - 2 < t)  {
+			break
+		}
+		time.Sleep(time.Millisecond * 10)
 	}
 
 	return nil

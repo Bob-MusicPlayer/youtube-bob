@@ -6,6 +6,7 @@ import (
 	"net/http"
 	shared "shared-bob"
 	"strconv"
+	"time"
 	"youtube-bob/repository"
 	"youtube-bob/util"
 )
@@ -73,7 +74,19 @@ func (yh *YoutubeHandler) HandleSetPlayback(w http.ResponseWriter, req *http.Req
 		return
 	}
 
-	yh.player.CurrentPlayback.Title = videoInfo.Items[0].Snippet.Title
+	for {
+		if title, err := yh.player.GetTitle(); err != nil || (title != fmt.Sprintf("watch?v=%s", playback.ID) && title != "") {
+			yh.player.CurrentPlayback.Title = title
+			break
+		}
+		time.Sleep(time.Millisecond * 200)
+	}
+	if responseHelper.ReturnHasError(err) {
+		return
+	}
+
+	go yh.player.ListenForCacheChanges()
+
 	yh.player.CurrentPlayback.Author = videoInfo.Items[0].Snippet.ChannelTitle
 	yh.player.CurrentPlayback.ThumbnailUrl = videoInfo.Items[0].Snippet.Thumbnails.High.URL
 

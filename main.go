@@ -11,9 +11,11 @@ import (
 )
 
 var youtubeApiKey string
+var bobUrl string
 
 func FlagsAreValid() bool {
 	youtubeApiKeyArg := flag.String("apiKey", "", "The Api Key from YouTube")
+	bobUrlArg := flag.String("bobUrl", "http://localhost:5002", "The url of bob")
 
 	flag.Parse()
 
@@ -23,6 +25,7 @@ func FlagsAreValid() bool {
 	}
 
 	youtubeApiKey = *youtubeApiKeyArg
+	bobUrl = *bobUrlArg
 
 	return true
 }
@@ -32,7 +35,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	player, err := util.NewPlayer()
+	bobRepository := repository.NewBobRepository(bobUrl)
+
+
+	player, err := util.NewPlayer(bobRepository)
 	if err != nil {
 		panic(err)
 	}
