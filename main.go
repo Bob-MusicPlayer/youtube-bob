@@ -19,7 +19,7 @@ func FlagsAreValid() bool {
 
 	flag.Parse()
 
-	if youtubeApiKeyArg == nil {
+	if *youtubeApiKeyArg == "" {
 		flag.PrintDefaults()
 		return false
 	}
