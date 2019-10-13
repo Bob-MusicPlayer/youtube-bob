@@ -37,7 +37,6 @@ func main() {
 
 	bobRepository := repository.NewBobRepository(bobUrl)
 
-
 	player, err := util.NewPlayer(bobRepository)
 	if err != nil {
 		panic(err)
@@ -56,5 +55,6 @@ func main() {
 	http.HandleFunc("/api/v1/playlist", youtubeHandler.HandlePlaylist)
 	http.HandleFunc("/api/v1/search", youtubeHandler.HandleSearch)
 
+	fmt.Println("Start server")
 	fmt.Println(http.ListenAndServe(":5001", nil))
 }

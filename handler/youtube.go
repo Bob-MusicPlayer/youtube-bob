@@ -87,6 +87,11 @@ func (yh *YoutubeHandler) HandleSetPlayback(w http.ResponseWriter, req *http.Req
 
 	go yh.player.ListenForCacheChanges()
 
+	if len(videoInfo.Items) == 0 {
+		fmt.Println("Videoinfo cant be loaded for id " + playback.ID + ". This is strange.")
+		return
+	}
+
 	yh.player.CurrentPlayback.Author = videoInfo.Items[0].Snippet.ChannelTitle
 	yh.player.CurrentPlayback.ThumbnailUrl = videoInfo.Items[0].Snippet.Thumbnails.High.URL
 

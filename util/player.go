@@ -29,7 +29,7 @@ func NewPlayer(bobRepository *repository.BobRepository) (*Player, error) {
 		socketPath = path.Join(os.TempDir(), "mpv-socket")
 	}
 
-	mpvCommand := exec.Command("mpv", "--idle=yes", fmt.Sprintf("--input-ipc-server=%s", socketPath), "-ytdl-format=bestaudio", "--keep-open=always", "--pause")
+	mpvCommand := exec.Command("mpv", "--ytdl-raw-options=hls-use-mpegts=", "--idle=yes", fmt.Sprintf("--input-ipc-server=%s", socketPath), "-ytdl-format=bestaudio", "--keep-open=always", "--pause")
 	err := mpvCommand.Start()
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (p *Player) ListenForCacheChanges() error {
 			continue
 		}
 
-		if time.Now().Sub(startTime) > time.Second * 5 || (duration > 0 && duration - 2 < t)  {
+		if time.Now().Sub(startTime) > time.Second*5 || (duration > 0 && duration-2 < t) {
 			break
 		}
 		time.Sleep(time.Millisecond * 10)
