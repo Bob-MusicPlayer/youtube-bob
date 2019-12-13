@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"youtube-bob/handler"
@@ -12,6 +13,10 @@ import (
 
 var youtubeApiKey string
 var bobUrl string
+
+const (
+	version = "0.0.1"
+)
 
 func FlagsAreValid() bool {
 	youtubeApiKeyArg := flag.String("apiKey", "", "The Api Key from YouTube")
@@ -35,6 +40,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	printBanner()
+
+	logrus.Info("Start Youtube Bob")
+
 	bobRepository := repository.NewBobRepository(bobUrl)
 
 	player, err := util.NewPlayer(bobRepository)
@@ -55,6 +64,24 @@ func main() {
 	http.HandleFunc("/api/v1/playlist", youtubeHandler.HandlePlaylist)
 	http.HandleFunc("/api/v1/search", youtubeHandler.HandleSearch)
 
-	fmt.Println("Start server")
-	fmt.Println(http.ListenAndServe(":5001", nil))
+	logrus.WithFields(logrus.Fields{
+		"hostname": "0.0.0.0",
+		"port":     "5001",
+	}).Info("Start Webserver")
+	fmt.Println(http.ListenAndServe("0.0.0.0:5001", nil))
+}
+
+func printBanner() {
+	fmt.Println("+------------------------------------------------+")
+	fmt.Println("|                                                |")
+	fmt.Println("|    \u001b[31m▄██████████▄\033[0m   ██████\033[1;34m╗\033[0m  ██████\033[1;34m╗\033[0m ██████\033[1;34m╗\033[0m     |")
+	fmt.Println("|   \u001b[31m██████\033[0;41m█▄\u001b[31m██████\033[0m  ██\033[1;34m╔══\033[0m██\033[1;34m╗\033[0m██\033[1;34m╔═══\033[0m██\033[1;34m╗\033[0m██\033[1;34m╔══\033[0m██\033[1;34m╗\033[0m    |")
+	fmt.Println("|   \u001b[31m██████\033[0;41m███■\u001b[31m████\033[0m  █████\033[1;34m╔╝\033[0m███\033[1;34m║\033[0m   ██\033[1;34m║\033[0m██████\033[1;34m╔╝\033[0m    |")
+	fmt.Println("|   \u001b[31m██████\033[0;41m█▀\u001b[31m██████\033[0m  ██\033[1;34m╔══\033[0m██\033[1;34m╗\033[0m██\033[1;34m║\033[0m   ██\033[1;34m║\033[0m██\033[1;34m╔══\033[0m██\033[1;34m╗\033[0m    |")
+	fmt.Println("|    \u001b[31m▀██████████▀\033[0m   ██████\033[1;34m╔╝╚\033[0m██████\033[1;34m╔╝\033[0m██████\033[1;34m╔╝\033[0m    |")
+	fmt.Println("|                   \033[1;34m╚═════╝  ╚═════╝ ╚═════╝\033[0m     |")
+	fmt.Println("|                                                |")
+	fmt.Println("+------------------------------------------------+")
+	fmt.Printf("|  Version: %7s                              |\n", version)
+	fmt.Println("+------------------------------------------------+")
 }
